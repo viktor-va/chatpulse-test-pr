@@ -1,0 +1,48 @@
+# === Laravel ===
+/vendor/
+/node_modules/
+/public/storage
+/storage/*.key
+/storage/app/public
+/.idea
+/.vscode
+.env
+.env.testing
+.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+npm-debug.log
+yarn-error.log
+pids
+*.pid
+
+# === Docker ===
+/docker/nginx/logs/
+/docker/monitoring/*
+!/docker/monitoring/prometheus.yml
+!/docker/monitoring/rules.yml
+!/docker/monitoring/filebeat.yml
+/docker/data/
+/docker/postgres/*
+!/docker/postgres/init.sql
+
+# === Build / Cache ===
+/public/build
+/public/hot
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitkeep
+
+# === Composer / Node locks (optional) ===
+# comment these out if you want them in git
+# composer.lock
+# package-lock.json
+
+# === OS / IDE ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# === CI ===
+/coverage/
+
