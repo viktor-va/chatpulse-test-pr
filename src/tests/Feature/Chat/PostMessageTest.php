@@ -16,7 +16,8 @@ class PostMessageTest extends TestCase
     public function test_member_can_post_message()
     {
         $user = User::factory()->create();
-        Passport::actingAs($user);
+        //Passport::actingAs($user);
+        Passport::actingAs($user, 'api');
 
         $org = Organization::create(['name' => 'Acme', 'slug' => 'acme']);
         Membership::create(['organization_id' => $org->id, 'user_id' => $user->id, 'role' => 'owner']);
@@ -39,7 +40,8 @@ class PostMessageTest extends TestCase
     public function test_non_member_cannot_post_message()
     {
         $user = User::factory()->create();
-        Passport::actingAs($user);
+        //Passport::actingAs($user);
+        Passport::actingAs($user, 'api');
 
         $org = Organization::create(['name' => 'Acme', 'slug' => 'acme']);
         // user is NOT a member of this room/org as admin/owner for manage, but we test member policy

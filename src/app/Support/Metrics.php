@@ -5,6 +5,7 @@ namespace App\Support;
 use Prometheus\CollectorRegistry;
 use Prometheus\RenderTextFormat;
 use Prometheus\Storage\Redis;
+use Prometheus\Storage\InMemory;
 
 class Metrics
 {
@@ -12,6 +13,11 @@ class Metrics
     {
         static $registry = null;
         if ($registry) return $registry;
+
+        if (app()->environment('testing') || env('PROM_STORAGE') === 'in_memory') {
+            $registry = new CollectorRegistry(new InMemory(), false);
+            return $registry;
+        }
 
         $adapter = new Redis([
             'host' => env('PROM_REDIS_HOST', 'redis'),

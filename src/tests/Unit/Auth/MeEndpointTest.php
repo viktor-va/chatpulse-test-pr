@@ -16,7 +16,8 @@ class MeEndpointTest extends TestCase
     {
         $user = User::factory()->create();
 
-        Passport::actingAs($user);
+        //Passport::actingAs($user);
+        Passport::actingAs($user, 'api');
 
         $response = $this->getJson('/api/me');
 
