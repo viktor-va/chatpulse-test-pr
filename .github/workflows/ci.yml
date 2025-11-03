@@ -9,6 +9,9 @@ on:
 jobs:
   phpunit:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src
 
     steps:
       - name: Checkout
@@ -57,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src  # ← adjust if your package.json is elsewhere
+        working-directory: ./src
     steps:
       - name: Checkout
         uses: actions/checkout@v4

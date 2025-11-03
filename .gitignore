@@ -4,7 +4,7 @@
 /public/storage
 /storage/*.key
 /storage/app/public
-/.idea
+/.idea/
 /.vscode
 .env
 .env.testing
@@ -15,9 +15,11 @@ npm-debug.log
 yarn-error.log
 pids
 *.pid
+*.iml
 
 # === Docker ===
-/docker/nginx/logs/
+/docker/nginx/logs/*
+!/docker/nginx/logs/.gitkeep
 /docker/monitoring/*
 !/docker/monitoring/prometheus.yml
 !/docker/monitoring/rules.yml
