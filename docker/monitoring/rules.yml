@@ -1,0 +1,11 @@
+groups:
+  - name: chatpulse.rules
+    rules:
+      - alert: ChatpulseHigh5xxRate
+        expr: sum(rate(chatpulse_http_requests_total{status=~"5.."}[1m]))
+              / clamp_min(sum(rate(chatpulse_http_requests_total[1m])), 1e-9) > 0.05
+        for: 30s
+        labels: { severity: warning }
+        annotations:
+          summary: "High 5xx error rate (>5%)"
+          description: "5xx over last 1m is above 5% of all requests."
