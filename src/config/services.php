@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'gateway' => [
+        'secret' => env('GATEWAY_SECRET'),
+    ],
+
 ];

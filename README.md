@@ -1,6 +1,26 @@
-# ChatPulse (Laravel 12 • Modular Monolith)
+# ChatPulse - Laravel Chat Backend
 
-Scalable chat backend for interview demos. Stack: **Docker, Nginx, Laravel 12, PostgreSQL, Redis, Reverb (WebSockets), Passport (OAuth2), Prometheus + Grafana, Elasticsearch + Kibana, Filebeat**. Structured as modules: `Modules/Auth`, `Modules/Org`, `Modules/Chat`.
+ChatPulse is a scalable chat backend built with **Laravel 12**, designed to demonstrate production-grade backend engineering for interviews and portfolio purposes.
+It starts as a **modular monolith** and evolves into a **hybrid mono-micro architecture**. Structured as 2 modules: `Modules/Auth`, `Modules/Org` and `chat-api` microservice (all in monorepo). With full observability, CI/CD, and test coverage.
+
+
+## 🚀 Tech Stack
+
+| Category         | Technology                                   |
+|------------------|----------------------------------------------|
+| Core             | PHP 8.3 + Laravel 12                         |
+| Containerization | Docker & Docker Compose                      |
+| Database         | PostgreSQL                                   |
+| Cache / Queue    | Redis                                        |
+| Realtime         | Laravel Reverb (WebSockets)                  |
+| Web Server       | Nginx                                        |
+| Observability    | Prometheus + Grafana, Elasticsearch + Kibana |
+| CI/CD            | GitHub Actions + local `act`                 |
+| Tests            | PHPUnit                                      |
+| Load Test        | k6 (manual baseline)                         |
+
+🐳 All components (App, Chat-API, Reverb, Nginx, Postgres, Redis, Prometheus, Grafana, Elasticsearch, Kibana) run as Docker containers for full local reproducibility.
+
 
 ## Quick start
 
@@ -24,27 +44,75 @@ docker compose exec php bash -lc 'npm ci && npm run build'
 docker compose exec php php artisan db:seed
 ```
 
-## Open:
-
 App demo: http://chatpulse.localhost:8080/demo
 
 Prometheus: http://localhost:9090, Grafana: http://localhost:3000
 
-Elasticsearch: http://localhost:9200, Kibana: http://localhost:5601
+Kibana: http://localhost:5601
 
 
-## API (sample)
+## API Samples
 
-POST /api/messages (room_id, body) — Bearer token (Passport)
+### 1. Authenticate & get token
 
-GET /api/rooms/{room}/messages — cursor pagination
+```bash
+curl -X POST http://chatpulse.localhost:8080/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+        "grant_type": "password",
+        "client_id": "<client_id>",
+        "client_secret": "<client_secret>",
+        "username": "dev@chatpulse.local",
+        "password": "password"
+      }'
+```
 
-GET /api/organizations/{org}/rooms — rooms for current user
+### 2. Get current authenticated user
 
-POST /api/rooms — create room (owner/admin), auto-membership
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+     http://chatpulse.localhost:8080/api/me
+```
 
-POST /api/rooms/{room}/members / DELETE .../{user} — manage members
+### 3. List chat rooms for user
 
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+     http://chatpulse.localhost:8080/api/chat/rooms
+```
+
+### 4. List messages in a room
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+     http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/messages
+```
+
+### 5. Post a new message
+
+```bash
+curl -X POST http://chatpulse.localhost:8080/api/chat/messages \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "room_id=$ROOM_ID&body=Test message from curl"
+```
+
+### 6. Add a room member
+
+```bash
+USER_ID="01K8P1VHQWJMQ5TZ5D0RB5V8KZ"
+curl -X POST http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/members \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "user_id=$USER_ID"
+```
+
+### 7. Remove a room member
+
+```bash
+curl -X DELETE http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/members/$USER_ID \
+  -H "Authorization: Bearer $TOKEN"
+```
 
 ## Observability
 
@@ -55,28 +123,36 @@ Nginx & Laravel JSON logs → Filebeat → Elasticsearch → Kibana (Discover: f
 Correlation: X-Request-Id across Nginx ⇄ Laravel logs
 
 
-## Development
+## Test Coverage
 
-Modular PSR-4 namespaces: Modules\Auth, Modules\Org, Modules\Chat
+| Scope | Tests |
+|-------|--------|
+| Auth | `MeEndpointTest` |
+| Chat Domain | `PostMessageTest`, `RoomMessagesTest`, `BroadcastMessageTest` |
+| Gateway | `GatewaySecretTest` |
 
-Queue worker + Reverb (WebSockets) via Redis scaling
-
-
-## Testing
+Run tests:
 
 ```bash
 docker compose exec php php artisan test
 ```
 
-PHPUnit uses SQLite :memory:; see phpunit.xml overrides
+## Performance Baseline (Manual)
 
-Example tests: MeEndpointTest, PostMessageTest
+```bash
+docker run --rm --network=host \
+  -e BASE_URL=http://chatpulse.localhost:8080 \
+  -e TOKEN=$TOKEN \
+  -e ROOM_ID=$ROOM_ID \
+  -v "$(pwd)/loadtest:/loadtest" \
+  grafana/k6 run /loadtest/chat-messages.js
+```
+Check metrics in Prometheus (localhost:9000) and logs in Kibana (localhost:5601).
+
 
 ## CI (GitHub Actions)
 
 .github/workflows/ci.yml runs PHPUnit on PHP 8.3 with SQLite.
-
-Extend with Node build and Docker image stages if desired.
 
 ## License
 

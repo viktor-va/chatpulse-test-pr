@@ -7,21 +7,50 @@ services:
     depends_on:
       - php
     volumes:
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./src:/var/www/html:ro
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/nginx/logs:/var/log/nginx
-      - ./src:/var/www/html:cached
     networks: [appnet]
 
   php:
     build:
-      context: ./docker/php
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: chatpulse_php
     container_name: chatpulse_php
     environment:
       PHP_MEMORY_LIMIT: 512M
     volumes:
       - ./src:/var/www/html:cached
     networks: [appnet]
+
+  chat-api:
+    #build:
+    #  context: .
+    #  dockerfile: docker/php/Dockerfile
+    image: chatpulse_php
+    container_name: chatpulse_chat_api
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      APP_NAME: ChatPulse Chat API
+      APP_ENV: local
+      APP_URL: http://chat-api:9000
+      API_ROUTES: routes/chat-api.php
+      LOG_CHANNEL: stack
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: chatpulse
+      DB_USERNAME: chatpulse
+      DB_PASSWORD: chatpulse
+      BROADCAST_DRIVER: reverb
+      CACHE_DRIVER: redis
+      REDIS_HOST: redis
+      GATEWAY_SECRET: super-long-random-string-here
+    depends_on: [ postgres, redis, reverb ]
+    networks: [ appnet ]
 
   postgres:
     image: postgres:16-alpine
@@ -70,8 +99,6 @@ services:
       - ./src:/var/www/html:cached
     networks: [appnet]
 
-
-    # docker-compose.yml
   prometheus:
     image: prom/prometheus:v2.54.0
     container_name: chatpulse_prometheus

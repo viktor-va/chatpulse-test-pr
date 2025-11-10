@@ -18,10 +18,11 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // In tests, use session auth for the `api` guard to avoid Passport keys.
+        // In tests, use session auth for the api guard to avoid Passport keys.
         config([
             'auth.defaults.guard' => 'api',
             'auth.guards.api.driver' => 'session',
+            'services.gateway.secret' => null,
         ]);
     }
 }

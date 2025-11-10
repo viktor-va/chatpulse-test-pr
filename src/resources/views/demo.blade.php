@@ -22,7 +22,7 @@
 
     // Fetch latest messages
     async function loadMessages() {
-        const res = await fetch(`/api/rooms/${ROOM_ID}/messages`, {
+        const res = await fetch(`/api/chat/rooms/${ROOM_ID}/messages`, {
             headers: { 'Authorization': `Bearer ${TOKEN}` }
         });
         const data = await res.json();
@@ -35,7 +35,7 @@
         if (e.key === 'Enter' && e.target.value.trim()) {
             const body = e.target.value.trim();
             e.target.value = '';
-            await fetch('/api/messages', {
+            await fetch('/api/chat/messages', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
