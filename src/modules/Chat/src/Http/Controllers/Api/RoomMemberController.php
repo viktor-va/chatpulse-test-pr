@@ -5,8 +5,8 @@ namespace Modules\Chat\Http\Controllers\Api;
 use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Modules\Chat\Models\{Room};
-use App\Models\{RoomMember, User};
+use Modules\Auth\Models\User;
+use Modules\Chat\Models\{Room, RoomMember};
 
 class RoomMemberController extends Controller
 {

@@ -11,4 +11,9 @@ class Room extends Model
 
     protected $table = 'rooms';
     protected $fillable = ['organization_id','type','name','is_private'];
+
+    public function members()
+    {
+        return $this->hasMany(RoomMember::class);
+    }
 }

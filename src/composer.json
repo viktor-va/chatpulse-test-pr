@@ -8,8 +8,8 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
-        "laravel/passport": "^12",
         "laravel/reverb": "^1.6",
+        "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1",
         "promphp/prometheus_client_php": "^2.10"
     },

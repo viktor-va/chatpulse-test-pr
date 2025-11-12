@@ -4,7 +4,7 @@ ChatPulse is a scalable chat backend built with **Laravel 12**, designed to demo
 It starts as a **modular monolith** and evolves into a **hybrid mono-micro architecture**. Structured as 2 modules: `Modules/Auth`, `Modules/Org` and `chat-api` microservice (all in monorepo). With full observability, CI/CD, and test coverage.
 
 
-## 🚀 Tech Stack
+## Tech Stack
 
 | Category         | Technology                                   |
 |------------------|----------------------------------------------|
@@ -15,7 +15,7 @@ It starts as a **modular monolith** and evolves into a **hybrid mono-micro archi
 | Realtime         | Laravel Reverb (WebSockets)                  |
 | Web Server       | Nginx                                        |
 | Observability    | Prometheus + Grafana, Elasticsearch + Kibana |
-| CI/CD            | GitHub Actions + local `act`                 |
+| CI/CD            | GitHub Actions (or use `act` for local)      |
 | Tests            | PHPUnit                                      |
 | Load Test        | k6 (manual baseline)                         |
 
@@ -24,27 +24,35 @@ It starts as a **modular monolith** and evolves into a **hybrid mono-micro archi
 
 ## Quick start
 
+### You will need installed docker and git to follow the steps:
+
 ```bash
-cp .env.example .env
-# set APP_URL, DB_*, REDIS_*, PASSPORT keys, REVERB_*, DEMO_USER_TOKEN, etc.
+# get repo & create .env
+git clone https://github.com/yourusername/chatpulse.git
+cd chatpulse
+cp .env.example src/.env
 
 # build & run
 docker compose up -d --build
 
-# install PHP deps
-docker compose exec php composer install
+# install PHP deps and app key
+docker compose exec php composer install --no-interaction --prefer-dist
 docker compose exec php php artisan key:generate
-docker compose exec php php artisan migrate
-docker compose exec php php artisan passport:install
+
+# migrate & seed
+docker compose exec php php artisan migrate:fresh --seed
 
 # build assets
 docker compose exec php bash -lc 'npm ci && npm run build'
 
-# seed demo org/room/messages (dev)
-docker compose exec php php artisan db:seed
+# reset caches and start containers that depends on php artisan
+docker compose exec php php artisan optimize:clear
+docker compose up -d
+
+
 ```
 
-App demo: http://chatpulse.localhost:8080/demo
+App demo: http://chatpulse.localhost:8080/demo (will work after API Samples step 1)
 
 Prometheus: http://localhost:9090, Grafana: http://localhost:3000
 
@@ -53,37 +61,48 @@ Kibana: http://localhost:5601
 
 ## API Samples
 
-### 1. Authenticate & get token
+### 1. Get token
 
 ```bash
-curl -X POST http://chatpulse.localhost:8080/oauth/token \
-  -H "Content-Type: application/json" \
-  -d '{
-        "grant_type": "password",
-        "client_id": "<client_id>",
-        "client_secret": "<client_secret>",
-        "username": "dev@chatpulse.local",
-        "password": "password"
-      }'
+TOKEN=$(curl -s -X POST http://chatpulse.localhost:8080/api/token \
+  -d "email=dev@chatpulse.local" -d "password=secret" | jq -r .token)
+echo "$TOKEN"
+
+# add this token to src/.env
+grep -q '^DEMO_USER_TOKEN=' src/.env && sed -i '' "s/^DEMO_USER_TOKEN=.*/DEMO_USER_TOKEN=$TOKEN/" src/.env || echo "DEMO_USER_TOKEN=$TOKEN" >> src/.env
+
+#reset caches
+docker compose exec php php artisan optimize:clear
+
+# so now you can check http://chatpulse.localhost:8080/demo
 ```
 
 ### 2. Get current authenticated user
 
 ```bash
-curl -H "Authorization: Bearer $TOKEN" \
-     http://chatpulse.localhost:8080/api/me
+curl -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/me
 ```
+
+### 3. Fetch organizations
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/organizations | jq
+#save ORG_ID
+```
+
 
 ### 3. List chat rooms for user
 
 ```bash
-curl -H "Authorization: Bearer $TOKEN" \
-     http://chatpulse.localhost:8080/api/chat/rooms
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "http://chatpulse.localhost:8080/api/chat/organizations/$ORG_ID/rooms" | jq
+# save ROOM_ID (better to use one from demo page)
 ```
 
 ### 4. List messages in a room
 
 ```bash
+
 curl -H "Authorization: Bearer $TOKEN" \
      http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/messages
 ```
@@ -95,23 +114,46 @@ curl -X POST http://chatpulse.localhost:8080/api/chat/messages \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "room_id=$ROOM_ID&body=Test message from curl"
+# check demo page or list messages in room to see posted message
 ```
 
-### 6. Add a room member
+### 6. List all users
 
 ```bash
-USER_ID="01K8P1VHQWJMQ5TZ5D0RB5V8KZ"
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "http://chatpulse.localhost:8080/api/users" | jq
+# pick one user for further endpoint requests
+```
+
+### 7. Add a room member
+
+```bash
 curl -X POST http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/members \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "user_id=$USER_ID"
 ```
 
-### 7. Remove a room member
+### 8. Check room members
+
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/members" | jq
+```
+
+### 9. Remove a room member
 
 ```bash
 curl -X DELETE http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/members/$USER_ID \
   -H "Authorization: Bearer $TOKEN"
+# you can check room members again if you want  
+```
+
+### 10. Logout
+
+```bash
+curl -i -X DELETE \
+  -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/token
 ```
 
 ## Observability

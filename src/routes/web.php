@@ -17,6 +17,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/login', fn() => 'Login placeholder')->name('login');
+
 Route::get('/demo', function () {
     return view('demo', [
         'roomId' => Room::where('name','general')->first()?->id,

@@ -10,6 +10,7 @@ use Modules\Auth\Models\User;
 use Modules\Org\Models\{Organization,Membership};
 use Modules\Chat\Models\{Room,RoomMember,Message};
 use App\Events\MessageCreated;
+use Laravel\Sanctum\Sanctum;
 
 class BroadcastMessageTest extends TestCase
 {
@@ -57,13 +58,12 @@ class BroadcastMessageTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $this->actingAs($user, 'api');
-
         $payload = [
             'room_id' => $room->id,
             'body'    => 'Broadcast smoke test',
         ];
 
+        Sanctum::actingAs($user);
         $response = $this->postJson('/api/messages', $payload);
 
         $response->assertCreated();

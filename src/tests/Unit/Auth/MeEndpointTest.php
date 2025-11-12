@@ -2,10 +2,9 @@
 
 namespace Tests\Unit\Auth;
 
-//use PHPUnit\Framework\TestCase;
 use Tests\TestCase;
 use Modules\Auth\Models\User;
-use Laravel\Passport\Passport;
+use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class MeEndpointTest extends TestCase
@@ -15,9 +14,7 @@ class MeEndpointTest extends TestCase
     public function test_me_endpoint_returns_authenticated_user()
     {
         $user = User::factory()->create();
-
-        //Passport::actingAs($user);
-        Passport::actingAs($user, 'api');
+        Sanctum::actingAs($user);
 
         $response = $this->getJson('/api/me');
 

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Auth\Models\User;
 use Modules\Org\Models\{Organization,Membership};
 use Modules\Chat\Models\{Room,RoomMember,Message};
+use Laravel\Sanctum\Sanctum;
 
 class RoomMessagesTest extends TestCase
 {
@@ -66,8 +67,7 @@ class RoomMessagesTest extends TestCase
             'body'    => 'Second message',
         ]);
 
-        $this->actingAs($user, 'api');
-
+        Sanctum::actingAs($user);
         $response = $this->getJson("/api/rooms/{$room->id}/messages");
 
         $response->assertOk();
@@ -112,8 +112,7 @@ class RoomMessagesTest extends TestCase
             'body'    => 'Secret',
         ]);
 
-        $this->actingAs($stranger, 'api');
-
+        Sanctum::actingAs($stranger);
         $response = $this->getJson("/api/rooms/{$room->id}/messages");
 
         $response->assertForbidden();

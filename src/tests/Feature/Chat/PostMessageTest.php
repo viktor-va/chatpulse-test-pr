@@ -5,16 +5,26 @@ namespace Tests\Feature\Chat;
 use Illuminate\Contracts\Console\Kernel;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Passport\Passport;
+use Laravel\Sanctum\Sanctum;
 use Modules\Auth\Models\User;
 use Modules\Org\Models\{Organization, Membership};
-use Modules\Chat\Models\{Room, RoomMember, Message};
+use Modules\Chat\Models\{Room, RoomMember};
 
 class PostMessageTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function createApplication()
+//
+//    protected function setUp(): void
+//    {
+//        // use chat-api routes for this class
+//        putenv('API_ROUTES=routes/chat-api.php');
+//        $_ENV['API_ROUTES']    = 'routes/chat-api.php';
+//        $_SERVER['API_ROUTES'] = 'routes/chat-api.php';
+//
+//        parent::setUp(); // now RefreshDatabase will migrate with the right routes loaded
+//    }
+     function createApplication()
     {
         // Boot like chat-api service
         putenv('API_ROUTES=routes/chat-api.php');
@@ -29,8 +39,7 @@ class PostMessageTest extends TestCase
     public function test_member_can_post_message()
     {
         $user = User::factory()->create();
-        //Passport::actingAs($user);
-        Passport::actingAs($user, 'api');
+        Sanctum::actingAs($user);
 
         $org = Organization::create(['name' => 'Acme', 'slug' => 'acme']);
         Membership::create(['organization_id' => $org->id, 'user_id' => $user->id, 'role' => 'owner']);
@@ -52,9 +61,8 @@ class PostMessageTest extends TestCase
 
     public function test_non_member_cannot_post_message()
     {
-        $user = User::factory()->create();
-        //Passport::actingAs($user);
-        Passport::actingAs($user, 'api');
+        $stranger = User::factory()->create();
+        Sanctum::actingAs($stranger);
 
         $org = Organization::create(['name' => 'Acme', 'slug' => 'acme']);
         $room = Room::create(['organization_id' => $org->id, 'type' => 'group', 'name' => 'secret', 'is_private' => true]);
