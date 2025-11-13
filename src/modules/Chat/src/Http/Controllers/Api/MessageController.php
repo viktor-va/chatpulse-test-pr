@@ -3,12 +3,12 @@
 namespace Modules\Chat\Http\Controllers\Api;
 
 use App\Support\Metrics;
-use Illuminate\Routing\Controller;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Modules\Chat\Events\MessageCreated;
 use Modules\Chat\Models\Message;
 use Modules\Chat\Models\Room;
-use App\Events\MessageCreated;
 
 class MessageController extends Controller
 {

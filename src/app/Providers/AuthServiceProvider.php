@@ -10,12 +10,11 @@ use Illuminate\Support\Facades\Gate;
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
-        Room::class => RoomPolicy::class,
+
     ];
 
     public function boot(): void
     {
-        $this->registerPolicies();
-        Gate::define('create', [RoomPolicy::class, 'create']);
+
     }
 }

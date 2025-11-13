@@ -2,12 +2,14 @@
 
 namespace Modules\Chat\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Modules\Chat\Database\Factories\MessageFactory;
 
 class Message extends Model
 {
-    use HasUlids;
+    use HasUlids, HasFactory;
 
     protected $table = 'messages';
 
@@ -16,4 +18,9 @@ class Message extends Model
     protected $casts = [
         'meta' => 'array',
     ];
+
+    protected static function newFactory(): MessageFactory
+    {
+        return MessageFactory::new();
+    }
 }

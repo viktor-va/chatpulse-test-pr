@@ -28,7 +28,7 @@ It starts as a **modular monolith** and evolves into a **hybrid mono-micro archi
 
 ```bash
 # get repo & create .env
-git clone https://github.com/yourusername/chatpulse.git
+git clone https://github.com/viktor-va/chatpulse-test-pr.git
 cd chatpulse
 cp .env.example src/.env
 
@@ -83,7 +83,7 @@ docker compose exec php php artisan optimize:clear
 curl -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/me
 ```
 
-### 3. Fetch organizations
+### 3. List your organizations
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/organizations | jq
@@ -91,7 +91,7 @@ curl -s -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/or
 ```
 
 
-### 3. List chat rooms for user
+### 3. List chat rooms for organization
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \

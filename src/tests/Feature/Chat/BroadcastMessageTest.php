@@ -3,14 +3,14 @@
 namespace Tests\Feature\Chat;
 
 use Illuminate\Contracts\Console\Kernel;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
-use Modules\Auth\Models\User;
-use Modules\Org\Models\{Organization,Membership};
-use Modules\Chat\Models\{Room,RoomMember,Message};
-use App\Events\MessageCreated;
 use Laravel\Sanctum\Sanctum;
+use Modules\Auth\Models\User;
+use Modules\Chat\Events\MessageCreated;
+use Modules\Chat\Models\{Message, Room, RoomMember};
+use Modules\Org\Models\{Membership, Organization};
+use Tests\TestCase;
 
 class BroadcastMessageTest extends TestCase
 {

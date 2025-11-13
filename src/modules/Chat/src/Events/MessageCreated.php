@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Events;
+namespace Modules\Chat\Events;
 
-use Modules\Chat\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
+use Modules\Chat\Models\Message;
 
 class MessageCreated implements ShouldBroadcast
 {

@@ -1,8 +1,8 @@
 <?php
 
-use App\Events\MessagePublished;
 use App\Support\Metrics;
 use Illuminate\Support\Facades\Route;
+use Modules\Chat\Events\MessagePublished;
 use Modules\Chat\Models\Room;
 use Prometheus\RenderTextFormat;
 
