@@ -9,6 +9,7 @@ It starts as a **modular monolith** and evolves into a **hybrid mono-micro archi
 | Category         | Technology                                   |
 |------------------|----------------------------------------------|
 | Core             | PHP 8.3 + Laravel 12                         |
+| Auth             | Laravel Sanctum (Bearer Tokens)              |
 | Containerization | Docker & Docker Compose                      |
 | Database         | PostgreSQL                                   |
 | Cache / Queue    | Redis                                        |
@@ -68,7 +69,7 @@ TOKEN=$(curl -s -X POST http://chatpulse.localhost:8080/api/token \
   -d "email=dev@chatpulse.local" -d "password=secret" | jq -r .token)
 echo "$TOKEN"
 
-# add this token to src/.env
+# add token to src/.env
 grep -q '^DEMO_USER_TOKEN=' src/.env && sed -i '' "s/^DEMO_USER_TOKEN=.*/DEMO_USER_TOKEN=$TOKEN/" src/.env || echo "DEMO_USER_TOKEN=$TOKEN" >> src/.env
 
 #reset caches
@@ -80,14 +81,14 @@ docker compose exec php php artisan optimize:clear
 ### 2. Get current authenticated user
 
 ```bash
-curl -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/me
+curl -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/me | jq
 ```
 
 ### 3. List your organizations
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" http://chatpulse.localhost:8080/api/organizations | jq
-#save ORG_ID
+# save ORG_ID
 ```
 
 
@@ -104,7 +105,7 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 ```bash
 
 curl -H "Authorization: Bearer $TOKEN" \
-     http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/messages
+     http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/messages | jq
 ```
 
 ### 5. Post a new message
@@ -113,7 +114,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 curl -X POST http://chatpulse.localhost:8080/api/chat/messages \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "room_id=$ROOM_ID&body=Test message from curl"
+  -d "room_id=$ROOM_ID&body=Test message from curl" | jq
 # check demo page or list messages in room to see posted message
 ```
 
@@ -122,7 +123,7 @@ curl -X POST http://chatpulse.localhost:8080/api/chat/messages \
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
   "http://chatpulse.localhost:8080/api/users" | jq
-# pick one user for further endpoint requests
+# pick one user and save it to USER_ID for further endpoint requests
 ```
 
 ### 7. Add a room member
@@ -131,7 +132,7 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 curl -X POST http://chatpulse.localhost:8080/api/chat/rooms/$ROOM_ID/members \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "user_id=$USER_ID"
+  -d "user_id=$USER_ID" | jq
 ```
 
 ### 8. Check room members
@@ -183,7 +184,7 @@ docker compose exec php php artisan test
 
 ```bash
 docker run --rm --network=host \
-  -e BASE_URL=http://chatpulse.localhost:8080 \
+  -e BASE_URL=http://localhost:8080 \
   -e TOKEN=$TOKEN \
   -e ROOM_ID=$ROOM_ID \
   -v "$(pwd)/loadtest:/loadtest" \
