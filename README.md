@@ -29,8 +29,8 @@ It starts as a **modular monolith** and evolves into a **hybrid mono-micro archi
 ```bash
 # get repo & create .env
 git clone https://github.com/viktor-va/chatpulse-test-pr.git
-cd chatpulse
-cp .env.example src/.env
+cd chatpulse-test-pr
+cp src/.env.example src/.env
 
 # build & run
 docker compose up -d --build
